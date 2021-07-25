@@ -11,5 +11,20 @@
     <Setting Name="channel" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="token" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="startPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">3923</Value>
+    </Setting>
+    <Setting Name="endPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">3924</Value>
+    </Setting>
+    <Setting Name="hostname" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost</Value>
+    </Setting>
+    <Setting Name="dataType" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">6</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

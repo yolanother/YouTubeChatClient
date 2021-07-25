@@ -1,16 +1,16 @@
 ﻿using Google.Apis.YouTube.v3.Data;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using UdpBroadcastUtility;
 using YouTube.Base;
 using YouTube.Base.Clients;
+using Settings = YouTube_Chat_Client.Properties.Settings;
 
 namespace YouTube_Chat_Client
 {
@@ -34,6 +34,61 @@ namespace YouTube_Chat_Client
             OAuthClientScopeEnum.ViewMonetaryAnalytics
         };
 
+        public string Hostname
+        {
+            get
+            {
+                return Settings.Default.hostname;
+            }
+
+            set
+            {
+                Settings.Default.hostname = value;
+                Settings.Default.Save();
+            }
+        }
+
+        public int PortStart
+        {
+            get
+            {
+                return Settings.Default.startPort;
+            }
+
+            set
+            {
+                Settings.Default.startPort = value;
+                Settings.Default.Save();
+            }
+        }
+        public int PortEnd
+        {
+            get
+            {
+                return Settings.Default.endPort;
+            }
+
+            set
+            {
+                Settings.Default.endPort = value;
+                Settings.Default.Save();
+            }
+        }
+
+        public byte PartialTranscriptionDataType
+        {
+            get
+            {
+                return Settings.Default.dataType;
+            }
+
+            set
+            {
+                Settings.Default.dataType = value;
+                Settings.Default.Save();
+            }
+        }
+
         public Form1()
         {
             InitializeComponent();
@@ -45,12 +100,15 @@ namespace YouTube_Chat_Client
 
         private void Form1_ResizeEnd(object sender, EventArgs e)
         {
-
+            //TopMost = WindowState == FormWindowState.Normal;
+            //if (WindowState == FormWindowState.Minimized) Hide();
         }
 
         private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             WindowState = FormWindowState.Normal;
+            Focus();
+            BringToFront();
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
@@ -72,7 +130,7 @@ namespace YouTube_Chat_Client
             }
             else
             {
-                ConnectToChannel("UCWxlUwW9BgGISaakjGM37aw");
+                ConnectToChannel(txtChannel.Text);
             }
         }
 
@@ -91,25 +149,11 @@ namespace YouTube_Chat_Client
         {
             if (connection != null)
             {
-                //
-
-                //Channel channel = await connection.Channels.GetChannelByID("UCyl1z3jo3XHR1riLFKG5UAg");
-
 
                 if (channel != null)
                 {
-                    this.channel = channel;
                     Log("Connection successful. Joined channel: " + channel.Snippet.Title);
-
-                    //LiveBroadcast broadcast = await connection.LiveBroadcasts.GetChannelActiveBroadcast(channel);
-                    //if (broadcast == null)
-                    //{
-                    //    broadcast = await connection.LiveBroadcasts.GetBroadcastByID("9rCRhTrEpDE");
-                    //    if (broadcast == null)
-                    //    {
-                    //        broadcast = new LiveBroadcast() { Snippet = new LiveBroadcastSnippet() { LiveChatId = "Cg0KC1VxWFFjZmZvTXhjKicKGFVDSHN4NEhxYS0xT1JqUVRoOVRZRGh3dxILVXFYUWNmZm9NeGM" } };
-                    //    }
-                    //}
+                    this.channel = channel;
 
                     client = new ChatClient(connection);
                     client.OnMessagesReceived += Client_OnMessagesReceived;
@@ -122,16 +166,18 @@ namespace YouTube_Chat_Client
                         Log("Failed to connect to live chat");
                     }
 
+
                     var broadcast = await connection.LiveBroadcasts.GetChannelActiveBroadcast(channel);
                     if (null != broadcast)
                     {
                         var messages = await connection.LiveChat.GetMessages(broadcast);
-                        foreach(var message in messages.Messages)
+                        foreach (var message in messages.Messages)
                         {
                             Log(string.Format("{0}: {1}", message.AuthorDetails.DisplayName, message.Snippet.DisplayMessage));
                         }
                     }
                 }
+                OnConnectionStateChanged();
             }
         }
 
@@ -146,7 +192,25 @@ namespace YouTube_Chat_Client
                 {
                     Log("Initializing connection");
 
-                    connection = await YouTubeConnection.ConnectViaLocalhostOAuthBrowser(txtClientId.Text, txtClientSecret.Text, scopes);
+                    if (!string.IsNullOrEmpty(Properties.Settings.Default.token))
+                    {
+                        try
+                        {
+                            connection = await YouTubeConnection.ConnectViaAuthorizationCode(txtClientId.Text, txtClientSecret.Text, Properties.Settings.Default.token);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log(ex.Message + "\r\nCould not restore login. Requesting a new login.");
+                        }
+                    }
+
+                    if(null == connection)
+                    {
+                        connection = await YouTubeConnection.ConnectViaLocalhostOAuthBrowser(txtClientId.Text, txtClientSecret.Text, scopes);
+                        var token = connection.GetOAuthTokenCopy();
+                        Properties.Settings.Default.token = token.authorizationCode;
+                        Properties.Settings.Default.Save();
+                    }
                     OnConnectionStateChanged();
                 }
                 catch (Exception ex)
@@ -165,8 +229,10 @@ namespace YouTube_Chat_Client
             }
             else
             {
-                btnLogin.Visible = false;
-                btnJoin.Visible = true;
+                btnLogin.Visible = null == connection;
+                btnJoin.Visible = btnLogin.Visible == false && null == channel;
+                btnSend.Visible = btnJoin.Visible == false && null != channel;
+                txtChatMessage.Visible = btnSend.Visible;
             }
         }
 
@@ -175,6 +241,9 @@ namespace YouTube_Chat_Client
             foreach(var message in e)
             {
                 Log(string.Format("{0}: {1}", message.AuthorDetails.DisplayName, message.Snippet.DisplayMessage));
+                
+                string serializedString = JsonConvert.SerializeObject(message);
+                Broadcaster.Send(serializedString, 6, Hostname, PortStart, PortEnd);
             }
         }
 
@@ -205,9 +274,9 @@ namespace YouTube_Chat_Client
 
         public void SendMessage(string message)
         {
-            if (null == channel || null == connection) return;
+            /*if (null == channel || null == connection) return;
 
-            new Task(async () =>
+            Task.Run(async () =>
             {
                 var broadcast = await connection.LiveBroadcasts.GetChannelActiveBroadcast(channel);
 
@@ -215,7 +284,18 @@ namespace YouTube_Chat_Client
                 {
                     await client.SendMessage(message);
                 }
-            });
+            });*/
+            Broadcaster.Send(message, 4, Hostname, PortStart, PortEnd);
+        }
+
+        private void btnSend_Click(object sender, EventArgs e)
+        {
+            SendMessage(txtChatMessage.Text);
+        }
+
+        private void txtChatMessage_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter) SendMessage(txtChatMessage.Text);
         }
     }
 }

@@ -37,13 +37,15 @@ namespace YouTube_Chat_Client
             this.btnLogin = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.txtLog = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.txtChannel = new System.Windows.Forms.TextBox();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.label3 = new System.Windows.Forms.Label();
+            this.txtChannel = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.btnJoin = new System.Windows.Forms.Button();
+            this.txtChatMessage = new System.Windows.Forms.TextBox();
+            this.btnSend = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -107,6 +109,17 @@ namespace YouTube_Chat_Client
             this.tabPage1.Text = "Chat Log";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // txtLog
+            // 
+            this.txtLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtLog.Location = new System.Drawing.Point(0, 0);
+            this.txtLog.Multiline = true;
+            this.txtLog.Name = "txtLog";
+            this.txtLog.Size = new System.Drawing.Size(790, 390);
+            this.txtLog.TabIndex = 1;
+            // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.label3);
@@ -123,34 +136,14 @@ namespace YouTube_Chat_Client
             this.tabPage2.Text = "Settings";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // txtLog
+            // label3
             // 
-            this.txtLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtLog.Location = new System.Drawing.Point(0, 0);
-            this.txtLog.Multiline = true;
-            this.txtLog.Name = "txtLog";
-            this.txtLog.Size = new System.Drawing.Size(790, 390);
-            this.txtLog.TabIndex = 1;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(8, 36);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(45, 13);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "Client Id";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(8, 62);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(67, 13);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "Client Secret";
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(8, 88);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(106, 13);
+            this.label3.TabIndex = 6;
+            this.label3.Text = "Channel Id (Optional)";
             // 
             // txtChannel
             // 
@@ -163,14 +156,23 @@ namespace YouTube_Chat_Client
             this.txtChannel.TabIndex = 5;
             this.txtChannel.TextChanged += new System.EventHandler(this.txtChannel_TextChanged);
             // 
-            // label3
+            // label2
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(8, 88);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(106, 13);
-            this.label3.TabIndex = 6;
-            this.label3.Text = "Channel Id (Optional)";
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(8, 62);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(67, 13);
+            this.label2.TabIndex = 4;
+            this.label2.Text = "Client Secret";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(8, 36);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(45, 13);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "Client Id";
             // 
             // btnJoin
             // 
@@ -183,17 +185,41 @@ namespace YouTube_Chat_Client
             this.btnJoin.Visible = false;
             this.btnJoin.Click += new System.EventHandler(this.btnJoin_Click);
             // 
+            // txtChatMessage
+            // 
+            this.txtChatMessage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtChatMessage.Location = new System.Drawing.Point(4, 420);
+            this.txtChatMessage.Name = "txtChatMessage";
+            this.txtChatMessage.Size = new System.Drawing.Size(709, 20);
+            this.txtChatMessage.TabIndex = 6;
+            this.txtChatMessage.Visible = false;
+            this.txtChatMessage.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtChatMessage_KeyDown);
+            // 
+            // btnSend
+            // 
+            this.btnSend.Location = new System.Drawing.Point(719, 418);
+            this.btnSend.Name = "btnSend";
+            this.btnSend.Size = new System.Drawing.Size(75, 23);
+            this.btnSend.TabIndex = 7;
+            this.btnSend.Text = "Send";
+            this.btnSend.UseVisualStyleBackColor = true;
+            this.btnSend.Visible = false;
+            this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.btnSend);
+            this.Controls.Add(this.txtChatMessage);
             this.Controls.Add(this.btnJoin);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.btnLogin);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "YouTube Chat Client";
             this.ResizeEnd += new System.EventHandler(this.Form1_ResizeEnd);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
@@ -201,6 +227,7 @@ namespace YouTube_Chat_Client
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -219,6 +246,8 @@ namespace YouTube_Chat_Client
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox txtChannel;
         private System.Windows.Forms.Button btnJoin;
+        private System.Windows.Forms.TextBox txtChatMessage;
+        private System.Windows.Forms.Button btnSend;
     }
 }
 

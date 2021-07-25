@@ -110,5 +110,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UdpBroadcastLib\UdpBroadcastLib.csproj">
+      <Project>{C08766BE-6592-4D3F-9655-38799A325C4E}</Project>
+      <Name>UdpBroadcastLib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

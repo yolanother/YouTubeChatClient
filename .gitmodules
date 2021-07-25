@@ -1,0 +1,3 @@
+[submodule "UdpBroadcastLib"]
+	path = UdpBroadcastLib
+	url = https://github.com/yolanother/UdpBroadcastLib
