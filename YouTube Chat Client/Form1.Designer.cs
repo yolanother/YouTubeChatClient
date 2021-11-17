@@ -311,6 +311,7 @@ namespace YouTube_Chat_Client
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.Text = "YouTube Chat Client";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResizeEnd += new System.EventHandler(this.Form1_ResizeEnd);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);

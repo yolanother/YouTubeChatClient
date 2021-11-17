@@ -25,7 +25,9 @@ namespace YouTube_Chat_Client
         private Channel channel;
         private NamedPipeServerStream pipeServer;
         private StreamWriter pipeStream;
+        private Thread pipeThread;
         private NamedPipeClientStream pipeClient;
+        private Thread clientThread;
         public static readonly List<OAuthClientScopeEnum> scopes = new List<OAuthClientScopeEnum>()
         {
             OAuthClientScopeEnum.ChannelMemberships,
@@ -103,6 +105,46 @@ namespace YouTube_Chat_Client
             txtChannel.Text = Properties.Settings.Default.channel;
             txtNamedPipe.Text = Settings.Default.namedPipe;
             SetTextEventDelegate = SetText;
+
+            FormClosing += new FormClosingEventHandler(OnClosing);
+        }
+
+        private void OnClosing(object sender, FormClosingEventArgs e)
+        {
+            closing = true;
+            clientThread?.Abort();
+            pipeThread?.Abort();
+        }
+
+        private void StartClient()
+        {
+            if (string.IsNullOrEmpty(Settings.Default.namedPipe)) return;
+
+            if (null == pipeClient)
+            {
+                pipeClient = new NamedPipeClientStream(".", Settings.Default.namedPipe, PipeDirection.In);
+                clientThread = new Thread(() =>
+                {
+                    SafeSendText("Waiting for server...");
+                    pipeClient.Connect();
+                    SafeSendText("Connected.");
+
+                    using (StreamReader sr = new StreamReader(pipeClient))
+                    {
+                        string temp;
+                        while ((temp = sr.ReadLine()) != null && !closing)
+                        {
+                            SafeSendText(temp);
+                        }
+                    }
+                });
+                clientThread.Start();
+            }
+        }
+
+        private void SafeSendText(string text)
+        {
+            txtPipe.Invoke(SetTextEventDelegate, text);
         }
 
         private void SetText(string text)
@@ -268,42 +310,48 @@ namespace YouTube_Chat_Client
 
         public delegate void SetTextEvent(string text);
         public SetTextEvent SetTextEventDelegate;
+        private bool closing;
 
+
+        private List<NamedPipeServerStream> pipes = new List<NamedPipeServerStream>();
+        private List<StreamWriter> pipeStreams = new List<StreamWriter>();
         private void WriteNamedPipe(string serializedString)
         {
             if(!string.IsNullOrEmpty(Settings.Default.namedPipe))
             {
                 if(null == pipeServer)
                 {
-                    pipeServer = new NamedPipeServerStream(Settings.Default.namedPipe, PipeDirection.Out);
-                    pipeServer.WaitForConnectionAsync();
-                    pipeStream = new StreamWriter(pipeServer);
-                    pipeClient = new NamedPipeClientStream(".", Settings.Default.namedPipe, PipeDirection.In);
-                    pipeClient.Connect();
-                    new Thread(() =>
+
+                    pipeThread = new Thread(() =>
                     {
-                        using (StreamReader sr = new StreamReader(pipeClient))
+                        while (!closing)
                         {
-                            string temp;
-                            while ((temp = sr.ReadLine()) != null)
-                            {
-                                txtPipe.Invoke(SetTextEventDelegate, temp);
-                            }
+                            var pipeServer = new NamedPipeServerStream(Settings.Default.namedPipe, PipeDirection.Out, 50);
+                            pipeServer.WaitForConnection();
+                            var pipeStream = new StreamWriter(pipeServer);
+                            pipes.Add(pipeServer);
+                            pipeStreams.Add(pipeStream);
+                            Thread.Yield();
                         }
-                    }).Start();
+                    });
+                    pipeThread.Start();
                 }
 
-                if (pipeServer.IsConnected)
-                {
-                    pipeStream.WriteLine(serializedString);
-                    pipeStream.Flush();
+                for (int i = pipes.Count - 1; i >= 0; i--) {
+                    var pipeServer = pipes[i];
+                    var pipeStream = pipeStreams[i];
+                    if (pipeServer.IsConnected)
+                    {
+                        pipeStream.WriteLine(serializedString);
+                        pipeStream.Flush();
+                    }
+                    else
+                    {
+                        pipes.RemoveAt(i);
+                        pipeStreams.RemoveAt(i);
+                    }
                 }
             }
-        }
-
-        private void PipeServerWorker()
-        {
-            
         }
 
         private delegate void SafeCallDelegate(string text);
@@ -390,6 +438,11 @@ namespace YouTube_Chat_Client
         {
             Properties.Settings.Default.clientSecret = txtClientSecret.Text;
             Settings.Default.Save();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            StartClient();
         }
     }
 }
