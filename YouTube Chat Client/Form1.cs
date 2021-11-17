@@ -2,6 +2,8 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -21,6 +23,9 @@ namespace YouTube_Chat_Client
         private YouTubeConnection connection;
         private ChatClient client;
         private Channel channel;
+        private NamedPipeServerStream pipeServer;
+        private StreamWriter pipeStream;
+        private NamedPipeClientStream pipeClient;
         public static readonly List<OAuthClientScopeEnum> scopes = new List<OAuthClientScopeEnum>()
         {
             OAuthClientScopeEnum.ChannelMemberships,
@@ -96,6 +101,13 @@ namespace YouTube_Chat_Client
             txtClientId.Text = Properties.Settings.Default.clientId;
             txtClientSecret.Text = Properties.Settings.Default.clientSecret;
             txtChannel.Text = Properties.Settings.Default.channel;
+            txtNamedPipe.Text = Settings.Default.namedPipe;
+            SetTextEventDelegate = SetText;
+        }
+
+        private void SetText(string text)
+        {
+            txtPipe.Text = text + "\r\n" + txtPipe.Text;
         }
 
         private void Form1_ResizeEnd(object sender, EventArgs e)
@@ -243,8 +255,55 @@ namespace YouTube_Chat_Client
                 Log(string.Format("{0}: {1}", message.AuthorDetails.DisplayName, message.Snippet.DisplayMessage));
                 
                 string serializedString = JsonConvert.SerializeObject(message);
-                Broadcaster.Send(serializedString, 6, Hostname, PortStart, PortEnd);
+
+                Send(serializedString);
             }
+        }
+
+        private void Send(string serializedString)
+        {
+            Broadcaster.Send(serializedString, 6, Hostname, PortStart, PortEnd);
+            WriteNamedPipe(serializedString);
+        }
+
+        public delegate void SetTextEvent(string text);
+        public SetTextEvent SetTextEventDelegate;
+
+        private void WriteNamedPipe(string serializedString)
+        {
+            if(!string.IsNullOrEmpty(Settings.Default.namedPipe))
+            {
+                if(null == pipeServer)
+                {
+                    pipeServer = new NamedPipeServerStream(Settings.Default.namedPipe, PipeDirection.Out);
+                    pipeServer.WaitForConnectionAsync();
+                    pipeStream = new StreamWriter(pipeServer);
+                    pipeClient = new NamedPipeClientStream(".", Settings.Default.namedPipe, PipeDirection.In);
+                    pipeClient.Connect();
+                    new Thread(() =>
+                    {
+                        using (StreamReader sr = new StreamReader(pipeClient))
+                        {
+                            string temp;
+                            while ((temp = sr.ReadLine()) != null)
+                            {
+                                txtPipe.Invoke(SetTextEventDelegate, temp);
+                            }
+                        }
+                    }).Start();
+                }
+
+                if (pipeServer.IsConnected)
+                {
+                    pipeStream.WriteLine(serializedString);
+                    pipeStream.Flush();
+                }
+            }
+        }
+
+        private void PipeServerWorker()
+        {
+            
         }
 
         private delegate void SafeCallDelegate(string text);
@@ -296,6 +355,41 @@ namespace YouTube_Chat_Client
         private void txtChatMessage_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter) SendMessage(txtChatMessage.Text);
+        }
+
+        private void txtNamedPipe_TextChanged(object sender, EventArgs e)
+        {
+            Settings.Default.namedPipe = txtNamedPipe.Text;
+            Settings.Default.Save();
+        }
+
+        private void btnSendDebug_Click(object sender, EventArgs e)
+        {
+            Send(txtDebug.Text);
+        }
+
+        private void btnBrowse_Click(object sender, EventArgs e)
+        {
+            var result = savePipeFileDialog.ShowDialog();
+            if(result == DialogResult.OK)
+            {
+                txtNamedPipe.Text = savePipeFileDialog.FileName;
+                Settings.Default.namedPipe = txtNamedPipe.Text;
+                Settings.Default.Save();
+            }
+        }
+
+        private void txtClientId_TextChanged(object sender, EventArgs e)
+        {
+
+            Properties.Settings.Default.clientId = txtClientId.Text;
+            Settings.Default.Save();
+        }
+
+        private void txtClientSecret_TextChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.clientSecret = txtClientSecret.Text;
+            Settings.Default.Save();
         }
     }
 }

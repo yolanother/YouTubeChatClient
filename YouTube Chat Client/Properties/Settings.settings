@@ -26,5 +26,8 @@
     <Setting Name="dataType" Type="System.Byte" Scope="User">
       <Value Profile="(Default)">6</Value>
     </Setting>
+    <Setting Name="namedPipe" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

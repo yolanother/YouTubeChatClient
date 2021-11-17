@@ -46,9 +46,18 @@ namespace YouTube_Chat_Client
             this.btnJoin = new System.Windows.Forms.Button();
             this.txtChatMessage = new System.Windows.Forms.TextBox();
             this.btnSend = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.txtNamedPipe = new System.Windows.Forms.TextBox();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.txtDebug = new System.Windows.Forms.TextBox();
+            this.btnSendDebug = new System.Windows.Forms.Button();
+            this.txtPipe = new System.Windows.Forms.TextBox();
+            this.savePipeFileDialog = new System.Windows.Forms.SaveFileDialog();
+            this.btnBrowse = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
             // notifyIcon
@@ -67,6 +76,8 @@ namespace YouTube_Chat_Client
             this.txtClientId.Name = "txtClientId";
             this.txtClientId.Size = new System.Drawing.Size(664, 20);
             this.txtClientId.TabIndex = 1;
+            this.txtClientId.UseSystemPasswordChar = true;
+            this.txtClientId.TextChanged += new System.EventHandler(this.txtClientId_TextChanged);
             // 
             // txtClientSecret
             // 
@@ -74,9 +85,10 @@ namespace YouTube_Chat_Client
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtClientSecret.Location = new System.Drawing.Point(120, 59);
             this.txtClientSecret.Name = "txtClientSecret";
-            this.txtClientSecret.PasswordChar = '*';
             this.txtClientSecret.Size = new System.Drawing.Size(664, 20);
             this.txtClientSecret.TabIndex = 2;
+            this.txtClientSecret.UseSystemPasswordChar = true;
+            this.txtClientSecret.TextChanged += new System.EventHandler(this.txtClientSecret_TextChanged);
             // 
             // btnLogin
             // 
@@ -90,8 +102,12 @@ namespace YouTube_Chat_Client
             // 
             // tabControl1
             // 
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -122,6 +138,9 @@ namespace YouTube_Chat_Client
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.btnBrowse);
+            this.tabPage2.Controls.Add(this.label4);
+            this.tabPage2.Controls.Add(this.txtNamedPipe);
             this.tabPage2.Controls.Add(this.label3);
             this.tabPage2.Controls.Add(this.txtChannel);
             this.tabPage2.Controls.Add(this.label2);
@@ -187,7 +206,7 @@ namespace YouTube_Chat_Client
             // 
             // txtChatMessage
             // 
-            this.txtChatMessage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.txtChatMessage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtChatMessage.Location = new System.Drawing.Point(4, 420);
             this.txtChatMessage.Name = "txtChatMessage";
@@ -198,6 +217,7 @@ namespace YouTube_Chat_Client
             // 
             // btnSend
             // 
+            this.btnSend.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSend.Location = new System.Drawing.Point(719, 418);
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(75, 23);
@@ -206,6 +226,77 @@ namespace YouTube_Chat_Client
             this.btnSend.UseVisualStyleBackColor = true;
             this.btnSend.Visible = false;
             this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(8, 114);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(113, 13);
+            this.label4.TabIndex = 8;
+            this.label4.Text = "Named Pipe (Optional)";
+            // 
+            // txtNamedPipe
+            // 
+            this.txtNamedPipe.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtNamedPipe.Location = new System.Drawing.Point(120, 111);
+            this.txtNamedPipe.Name = "txtNamedPipe";
+            this.txtNamedPipe.Size = new System.Drawing.Size(589, 20);
+            this.txtNamedPipe.TabIndex = 7;
+            this.txtNamedPipe.UseSystemPasswordChar = true;
+            this.txtNamedPipe.TextChanged += new System.EventHandler(this.txtNamedPipe_TextChanged);
+            // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.txtPipe);
+            this.tabPage3.Controls.Add(this.btnSendDebug);
+            this.tabPage3.Controls.Add(this.txtDebug);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(790, 386);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "Debug";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // txtDebug
+            // 
+            this.txtDebug.Location = new System.Drawing.Point(3, 6);
+            this.txtDebug.Multiline = true;
+            this.txtDebug.Name = "txtDebug";
+            this.txtDebug.Size = new System.Drawing.Size(781, 123);
+            this.txtDebug.TabIndex = 0;
+            // 
+            // btnSendDebug
+            // 
+            this.btnSendDebug.Location = new System.Drawing.Point(709, 135);
+            this.btnSendDebug.Name = "btnSendDebug";
+            this.btnSendDebug.Size = new System.Drawing.Size(75, 23);
+            this.btnSendDebug.TabIndex = 8;
+            this.btnSendDebug.Text = "Send";
+            this.btnSendDebug.UseVisualStyleBackColor = true;
+            this.btnSendDebug.Click += new System.EventHandler(this.btnSendDebug_Click);
+            // 
+            // txtPipe
+            // 
+            this.txtPipe.Enabled = false;
+            this.txtPipe.Location = new System.Drawing.Point(3, 164);
+            this.txtPipe.Multiline = true;
+            this.txtPipe.Name = "txtPipe";
+            this.txtPipe.Size = new System.Drawing.Size(781, 216);
+            this.txtPipe.TabIndex = 9;
+            // 
+            // btnBrowse
+            // 
+            this.btnBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnBrowse.Location = new System.Drawing.Point(715, 111);
+            this.btnBrowse.Name = "btnBrowse";
+            this.btnBrowse.Size = new System.Drawing.Size(69, 23);
+            this.btnBrowse.TabIndex = 8;
+            this.btnBrowse.Text = "Browse";
+            this.btnBrowse.UseVisualStyleBackColor = true;
+            this.btnBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
             // 
             // Form1
             // 
@@ -226,6 +317,8 @@ namespace YouTube_Chat_Client
             this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -248,6 +341,14 @@ namespace YouTube_Chat_Client
         private System.Windows.Forms.Button btnJoin;
         private System.Windows.Forms.TextBox txtChatMessage;
         private System.Windows.Forms.Button btnSend;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox txtNamedPipe;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.Button btnSendDebug;
+        private System.Windows.Forms.TextBox txtDebug;
+        private System.Windows.Forms.TextBox txtPipe;
+        private System.Windows.Forms.Button btnBrowse;
+        private System.Windows.Forms.SaveFileDialog savePipeFileDialog;
     }
 }
 
